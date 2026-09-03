@@ -64,7 +64,7 @@ pipeline {
 
                 sh '''
                     sleep 15
-                    curl -f http://localhost:8081/actuator/health
+                    curl -f http://localhost:8081/actuator/invalid
                 '''
             }
         }
