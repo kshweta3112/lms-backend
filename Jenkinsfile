@@ -71,75 +71,40 @@ pipeline {
     }
 
     post {
+    success {
+        echo 'LMS DEPLOYMENT SUCCESSFUL!'
 
-        success {
-            echo 'LMS DEPLOYMENT SUCCESSFUL!'
+        emailext(
+            to: 'kundelishweta@gmail.com',
+            subject: "LMS Deployment SUCCESS - Build #${BUILD_NUMBER}",
+            body: """
+LMS Deployment Successful!
 
-            emailext(
-                subject: "LMS Deployment SUCCESS - Build #${BUILD_NUMBER}",
-                body: """
-LMS Deployment Successful
-
+Build Number: ${BUILD_NUMBER}
 Job: ${JOB_NAME}
-Build Number: #${BUILD_NUMBER}
 Status: SUCCESS
 
-Automated Testing: PASSED
-Docker Deployment: SUCCESS
-Application Health Check: PASSED
-
-The LMS application has been deployed successfully.
-
-Jenkins Build URL:
-${BUILD_URL}
-""",
-                to: "kundelishweta@gmail.com"
-            )
-        }
-
-        failure {
-            echo 'DEPLOYMENT FAILED!'
-            echo 'STARTING ROLLBACK...'
-
-            sh '''
-                docker stop lms-backend || true
-                docker rm lms-backend || true
-
-                if docker image inspect lms-backend:previous > /dev/null 2>&1; then
-
-                    docker run -d \
-                    --name lms-backend \
-                    -p 8081:8081 \
-                    lms-backend:previous
-
-                    echo "ROLLBACK SUCCESSFUL"
-
-                else
-
-                    echo "NO PREVIOUS VERSION AVAILABLE FOR ROLLBACK"
-
-                fi
-            '''
-
-            emailext(
-                subject: "LMS Deployment FAILED - Build #${BUILD_NUMBER}",
-                body: """
-LMS Deployment Failed
-
-Job: ${JOB_NAME}
-Build Number: #${BUILD_NUMBER}
-Status: FAILURE
-
-The LMS deployment failed.
-
-Automatic rollback was triggered.
-Please check the Jenkins console output for details.
-
-Jenkins Build URL:
-${BUILD_URL}
-""",
-                to: "kundelishweta@gmail.com"
-            )
-        }
+Health Check: UP
+"""
+        )
     }
+
+    failure {
+        echo 'LMS DEPLOYMENT FAILED!'
+
+        emailext(
+            to: 'kundelishweta@gmail.com',
+            subject: "LMS Deployment FAILED - Build #${BUILD_NUMBER}",
+            body: """
+LMS Deployment Failed!
+
+Build Number: ${BUILD_NUMBER}
+Job: ${JOB_NAME}
+Status: FAILED
+
+Please check the Jenkins console output.
+"""
+        )
+    }
+}
 }
