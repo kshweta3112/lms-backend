@@ -74,6 +74,27 @@ pipeline {
 
         success {
             echo 'LMS DEPLOYMENT SUCCESSFUL!'
+
+            emailext(
+                subject: "LMS Deployment SUCCESS - Build #${BUILD_NUMBER}",
+                body: """
+LMS Deployment Successful
+
+Job: ${JOB_NAME}
+Build Number: #${BUILD_NUMBER}
+Status: SUCCESS
+
+Automated Testing: PASSED
+Docker Deployment: SUCCESS
+Application Health Check: PASSED
+
+The LMS application has been deployed successfully.
+
+Jenkins Build URL:
+${BUILD_URL}
+""",
+                to: "kundelishweta@gmail.com"
+            )
         }
 
         failure {
@@ -99,6 +120,26 @@ pipeline {
 
                 fi
             '''
+
+            emailext(
+                subject: "LMS Deployment FAILED - Build #${BUILD_NUMBER}",
+                body: """
+LMS Deployment Failed
+
+Job: ${JOB_NAME}
+Build Number: #${BUILD_NUMBER}
+Status: FAILURE
+
+The LMS deployment failed.
+
+Automatic rollback was triggered.
+Please check the Jenkins console output for details.
+
+Jenkins Build URL:
+${BUILD_URL}
+""",
+                to: "kundelishweta@gmail.com"
+            )
         }
     }
 }
